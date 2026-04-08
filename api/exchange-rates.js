@@ -3,6 +3,16 @@ const cheerio = require('cheerio');
 
 // Fungsi untuk menangani endpoint /api/exchange-rates
 module.exports = async (req, res) => {
+  // Menambahkan header CORS untuk mengizinkan akses dari localhost atau domain lain
+  res.setHeader('Access-Control-Allow-Origin', '*');  // Ganti '*' dengan domain Anda jika ingin membatasi
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Custom-Header, Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    // Handle pre-flight request
+    return res.status(200).end();
+  }
+
   try {
     const url = 'https://www.x-rates.com/table/?from=USD&amount=1';
     const response = await axios.get(url); // Mengambil halaman X-Rates
@@ -15,7 +25,6 @@ module.exports = async (req, res) => {
       const currency = $(element).find('td').eq(0).text().trim();  // Nama mata uang
       const rateToUSD = $(element).find('td').eq(1).text().trim();  // Nilai tukar ke USD
 
-      // Menambahkan data ke array
       exchangeRates.push({ currency, rateToUSD });
     });
 
